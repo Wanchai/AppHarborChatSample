@@ -11,9 +11,11 @@ namespace AppHarborTest
             // Call the broadcastMessage method to update clients.
             Clients.All.broadcastMessage(name, message);
         }
+        /*
         public string[] GetClients()
         {
             return
         }
+        */
     }
 }
