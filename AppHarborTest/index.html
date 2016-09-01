@@ -3,19 +3,43 @@
 <head>
     <title>AppHarbor Chat</title>
     <style type="text/css">
+        body {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
         .container {
+            display: flex;
+            margin: 0 auto;
+            width: 600px;
+        }
+
+        .item1, .item2 {
             background-color: #eee;
-            margin: 20px auto;
-            padding: 20px;
-            width: 450px;
+            margin: 10px;
+            padding: 10px;
+        }
+
+        .item1 {
+            flex-grow: 3;
+            order: 1;
+        }
+
+        .item2 {
+            flex-grow: 2;
+            order: 2;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <input type="text" id="message" />
-        <input type="hidden" id="displayname" />
-        <ul id="discussion"></ul>
+        <div class="item1">
+            <input type="text" width="30" id="message" />
+            <input type="hidden" id="displayname" />
+            <ul id="discussion"></ul>
+        </div>
+        <div class="item2">
+            <ul id="people"></ul>
+        </div>
     </div>
 
     <!--Script references. -->
@@ -28,6 +52,8 @@
     <!--Add script to update the page and send messages.-->
     <script type="text/javascript">
         $(function () {
+            console.log('OK1');
+
             // Declare a proxy to reference the hub.
             var chat = $.connection.chatHub;
             // Create a function that the hub can call to broadcast messages.
@@ -40,13 +66,30 @@
                     + '</strong>:&nbsp;&nbsp;' + encodedMsg + '</li>');
             };
 
+            chat.client.refreshUser = function (list) {
+                var lst = "";
+                $.each(list, function (key, value) {
+                    console.log('OK2: ' + value);
+                    lst += '<li><strong>' + value + '</strong></li>';
+                });
+
+                $('#people').html(lst);
+
+                //console.log('OK2: ' + users);
+            };
+
             // Get the user name and store it to prepend to messages.
-            $('#displayname').val(prompt('Enter your name:', ''));
+            var name = prompt('Enter your name:', '');
+
+            $('#displayname').val(name);
+
             // Set initial focus to message input box.
             $('#message').focus();
 
             // Start the connection.
             $.connection.hub.start().done(function () {
+                chat.server.addUser(name);
+
                 $('#message').bind('keypress', function (e) {
                     var p = e.which;
                     if (p == 13) {
@@ -56,6 +99,14 @@
                         $('#message').val('').focus();
                     }
                 });
+
+            });
+            $(window).unload(function () {
+                console.log('OK5');
+
+                //chat.server.delete
+                //chat.server.deleteuser($('#displayname').val());
+                //return 'Are you sure you want to leave?';
             });
         });
     </script>
